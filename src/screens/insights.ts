@@ -142,11 +142,12 @@ export async function mount(container: HTMLElement): Promise<void> {
     const chart = document.createElement("div");
     chart.style.cssText = "display:flex;gap:3px;align-items:flex-end;height:100px;overflow-x:auto";
     const sorted = [...days].sort((a, b) => a.date.localeCompare(b.date));
-    sorted.forEach((d) => {
+    sorted.forEach((d, i) => {
       const pct = completionPct(d);
       const bar = document.createElement("div");
       bar.title = `${d.date}: ${Math.round(pct * 100)}%`;
-      bar.style.cssText = `flex:0 0 8px;height:${Math.max(4, Math.round(pct * 100))}%;background:var(--gold);border-radius:2px`;
+      bar.className = "bar-grow";
+      bar.style.cssText = `flex:0 0 8px;height:${Math.max(4, Math.round(pct * 100))}%;background:var(--gold);border-radius:2px;animation-delay:${i * 8}ms`;
       chart.appendChild(bar);
     });
     trendSection.appendChild(chart);
@@ -185,11 +186,11 @@ export async function mount(container: HTMLElement): Promise<void> {
     stats.style.cssText = "display:flex;gap:24px;margin-top:14px";
     stats.innerHTML = `
       <div>
-        <div class="display" style="font-size:2rem;color:var(--gold)">${pct}%</div>
+        <div class="display rise-in" style="font-size:2rem;color:var(--gold)">${pct}%</div>
         <div class="muted" style="font-size:0.8rem">completion</div>
       </div>
       <div>
-        <div class="display" style="font-size:2rem;color:var(--teal)">${longest}</div>
+        <div class="display rise-in" style="font-size:2rem;color:var(--teal);animation-delay:60ms">${longest}</div>
         <div class="muted" style="font-size:0.8rem">longest streak</div>
       </div>
     `;

@@ -141,6 +141,7 @@ export async function mount(container: HTMLElement): Promise<void> {
       groups.get(label)!.push(idea);
     }
 
+    let staggerIndex = 0;
     for (const [label, groupIdeas] of groups) {
       const section = document.createElement("div");
       const heading = document.createElement("h3");
@@ -153,7 +154,11 @@ export async function mount(container: HTMLElement): Promise<void> {
       rows.style.cssText = "display:flex;flex-direction:column;gap:8px";
 
       for (const idea of groupIdeas) {
-        rows.appendChild(renderIdeaCard(idea));
+        const card = renderIdeaCard(idea);
+        card.classList.add("rise-in");
+        card.style.animationDelay = `${Math.min(staggerIndex, 8) * 35}ms`;
+        staggerIndex++;
+        rows.appendChild(card);
       }
 
       section.appendChild(rows);

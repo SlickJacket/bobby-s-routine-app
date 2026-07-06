@@ -25,7 +25,23 @@
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --gold-glow: color-mix(in oklch, var(--gold) 70%, white 10%);
+  --teal-glow: color-mix(in oklch, var(--teal) 70%, white 10%);
+  --edge-light: color-mix(in oklch, var(--ink) 22%, transparent);
+
   color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 * {
@@ -55,6 +71,25 @@ body {
   width: 100%;
   max-width: 100%;
   text-align: left;
+  position: relative;
+}
+
+/* Subtle velvet-curtain grain — a fixed, ultra-low-opacity noise layer.
+   Pure CSS, no image request, negligible paint cost. */
+#app::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#app > * {
+  position: relative;
+  z-index: 1;
 }
 
 h1, h2, h3, .display {
@@ -112,9 +147,31 @@ main {
 
 .card {
   background: var(--panel);
-  border: 1px solid var(--line);
+  border: 1px solid transparent;
+  border-image: linear-gradient(180deg, var(--edge-light), var(--line) 55%) 1;
   border-radius: var(--radius);
   padding: 16px;
+  box-shadow: 0 8px 20px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Marquee bulb row — soft stage-light glow behind it */
+.marquee-glow {
+  position: relative;
+}
+
+.marquee-glow::before {
+  content: "";
+  position: absolute;
+  inset: -24px -12px auto -12px;
+  height: 90px;
+  background: radial-gradient(ellipse at center, color-mix(in oklch, var(--gold) 18%, transparent) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.marquee-glow > * {
+  position: relative;
+  z-index: 1;
 }
 
 .muted {
@@ -254,4 +311,183 @@ nav.tabbar button.active svg {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.chip, .icon-btn, nav.tabbar button, #save-idea-btn {
+  transition: transform 0.15s var(--ease-out-quart);
+}
+
+.chip:active, .icon-btn:active, #save-idea-btn:active {
+  transform: scale(0.94);
+}
+
+/* --- Bulb ignition sweep --- */
+@keyframes bulb-ignite {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bulb {
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  transition: background 0.25s var(--ease-out-quart), box-shadow 0.25s var(--ease-out-quart);
+}
+
+.bulb.lit {
+  animation: bulb-ignite 0.45s var(--ease-out-expo) backwards;
+}
+
+/* --- Habit tile toggle pulse --- */
+@keyframes tile-ignite {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.035);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.tile-pulse {
+  animation: tile-ignite 0.4s var(--ease-out-quart);
+}
+
+/* --- Streak number pop on change --- */
+@keyframes number-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.number-pop {
+  display: inline-block;
+  animation: number-pop 0.35s var(--ease-out-quart);
+}
+
+/* --- Crossfade for descriptor labels --- */
+.crossfade {
+  transition: opacity 0.15s ease;
+}
+
+.crossfade.fade-out {
+  opacity: 0;
+}
+
+/* --- Trend bar grow-in --- */
+@keyframes bar-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.bar-grow {
+  transform-origin: bottom;
+  animation: bar-grow 0.5s var(--ease-out-expo) backwards;
+}
+
+/* --- New best-streak spark burst --- */
+@keyframes spark-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--spark-x, 0), var(--spark-y, -30px)) scale(0);
+    opacity: 0;
+  }
+}
+
+.spark-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold-glow);
+  box-shadow: 0 0 6px 1px var(--gold-glow);
+  pointer-events: none;
+  animation: spark-burst 0.7s var(--ease-out-quart) forwards;
+}
+
+/* --- List entrance stagger --- */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.rise-in {
+  animation: rise-in 0.35s var(--ease-out-quart) backwards;
+}
+
+/* --- Custom range input (mood/energy sliders) --- */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  padding: 0;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--panel-2);
+}
+
+input[type="range"]::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--panel-2);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--gold) 25%, transparent), 0 0 12px 1px var(--gold-glow);
+  transition: box-shadow 0.2s var(--ease-out-quart);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 4px color-mix(in oklch, var(--gold) 25%, transparent), 0 0 12px 1px var(--gold-glow);
+}
+
+input[type="range"]:active::-webkit-slider-thumb {
+  box-shadow: 0 0 0 6px color-mix(in oklch, var(--gold) 30%, transparent), 0 0 16px 2px var(--gold-glow);
 }

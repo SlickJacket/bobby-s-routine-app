@@ -20,7 +20,8 @@ export const IDEA_TAG_CAP = 16;
 type MetaRecord =
   | { id: "habitList"; list: string[] }
   | { id: "ideaTags"; list: string[] }
-  | { id: "lastTag"; tag: IdeaTag };
+  | { id: "lastTag"; tag: IdeaTag }
+  | { id: "bestStreak"; value: number };
 
 interface AppDB extends DBSchema {
   days: { key: string; value: DayRecord };
@@ -208,6 +209,24 @@ export async function setIdeaTags(list: string[]): Promise<void> {
   const db = await getDB();
   const capped = list.slice(0, IDEA_TAG_CAP);
   await db.put("meta", { id: "ideaTags", list: capped });
+}
+
+// --- Best streak (all-time high, for the celebratory spark) ---
+
+export async function getBestStreak(): Promise<number> {
+  const db = await getDB();
+  const rec = await db.get("meta", "bestStreak");
+  return rec && rec.id === "bestStreak" ? rec.value : 0;
+}
+
+/** Returns true if `current` beats the stored best (and persists the new high). */
+export async function checkNewBestStreak(current: number): Promise<boolean> {
+  if (current <= 0) return false;
+  const best = await getBestStreak();
+  if (current <= best) return false;
+  const db = await getDB();
+  await db.put("meta", { id: "bestStreak", value: current });
+  return true;
 }
 
 // --- Backup / restore ---

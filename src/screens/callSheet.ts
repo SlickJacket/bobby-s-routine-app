@@ -1,8 +1,9 @@
-import { addDays, getDay, getTodayDay, saveDay, todayKey } from "../lib/db";
+import { addDays, checkNewBestStreak, getDay, getTodayDay, saveDay, todayKey } from "../lib/db";
 import { computeStreak, habitsDone, lastNDaysStrip } from "../lib/stats";
 import { getRouteParam, navigate } from "../lib/router";
 import { iconChevronLeft, iconChevronRight, iconGear } from "../lib/icons";
 import { showToast } from "../lib/toast";
+import { animateCount, prefersReducedMotion, spark } from "../lib/motion";
 import type { DayRecord } from "../lib/types";
 
 const MOOD_LABELS = ["Rough", "Bad", "Low", "Off", "Neutral", "Fine", "Good", "Great", "High", "Best"];
@@ -25,7 +26,7 @@ export async function mount(container: HTMLElement): Promise<void> {
       <button class="icon-btn" id="settings-btn" aria-label="Edit cues">${iconGear}</button>
     </div>
 
-    <div class="card" style="margin-top:16px">
+    <div class="card marquee-glow" style="margin-top:16px">
       <div id="bulb-row" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:12px"></div>
       <div id="streak-line" class="muted" style="text-align:center;font-size:0.9rem"></div>
     </div>
@@ -108,6 +109,9 @@ export async function mount(container: HTMLElement): Promise<void> {
     if (viewedDate < today) navigate("call-sheet", addDays(viewedDate, 1));
   });
 
+  let lastStreak = -1;
+  let firstRender = true;
+
   async function persist(updated: DayRecord): Promise<void> {
     await saveDay(updated);
     showToast("Saved");
@@ -121,31 +125,45 @@ export async function mount(container: HTMLElement): Promise<void> {
     bulbRow.innerHTML = Array.from({ length: totalHabits })
       .map((_, i) => {
         const lit = i < doneCount;
-        return `<span style="width:16px;height:16px;border-radius:50%;background:${
-          lit ? "var(--gold)" : "var(--panel-2)"
-        };border:1px solid var(--line);${lit ? "box-shadow:0 0 8px var(--gold)" : ""}"></span>`;
+        const delay = firstRender ? i * 45 : 0;
+        return `<span class="bulb${lit ? " lit" : ""}" style="width:16px;height:16px;${
+          lit ? `animation-delay:${delay}ms;` : ""
+        }background:${lit ? "var(--gold)" : "var(--panel-2)"};${
+          lit ? "box-shadow:0 0 8px var(--gold)" : ""
+        }"></span>`;
       })
       .join("");
 
     const streak = await computeStreak();
-    streakLine.textContent =
-      streak === 0
-        ? "No streak yet — log a cue today to start one."
-        : `${streak}-day streak`;
+    if (streak === 0) {
+      streakLine.innerHTML = "No streak yet — log a cue today to start one.";
+    } else {
+      streakLine.innerHTML = `<span class="spark-wrap"><span id="streak-num" class="display number-pop" style="font-size:1.3rem;color:var(--gold)"></span></span> <span class="muted">day streak</span>`;
+      const numEl = streakLine.querySelector<HTMLSpanElement>("#streak-num")!;
+      animateCount(numEl, lastStreak > 0 ? lastStreak : streak, streak);
+
+      const isNewBest = await checkNewBestStreak(streak);
+      if (isNewBest && !firstRender) {
+        spark(streakLine.querySelector<HTMLSpanElement>(".spark-wrap")!);
+      }
+    }
+    lastStreak = streak;
 
     const bars = await lastNDaysStrip(7);
     strip.innerHTML = bars
-      .map((b) => {
+      .map((b, i) => {
         const heightPct = Math.max(6, Math.round(b.pct * 100));
         const isToday = b.date === today;
         const color = isToday ? "var(--gold)" : "var(--teal)";
         return `
           <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end">
-            <div style="width:100%;max-width:28px;border-radius:4px;height:${heightPct}%;min-height:4px;background:${color}"></div>
+            <div class="bar-grow" style="width:100%;max-width:28px;border-radius:4px;height:${heightPct}%;min-height:4px;background:${color};animation-delay:${i * 40}ms"></div>
             <span class="muted" style="font-size:0.7rem">${b.dayLabel}</span>
           </div>`;
       })
       .join("");
+
+    firstRender = false;
   }
 
   function renderHabitGrid(): void {
@@ -154,17 +172,22 @@ export async function mount(container: HTMLElement): Promise<void> {
       const done = !!day.habits[habit];
       const tile = document.createElement("button");
       tile.className = "card";
-      tile.style.cssText = `text-align:left;padding:14px;min-height:56px;display:flex;align-items:center;justify-content:space-between;border-color:${
-        done ? "var(--teal)" : "var(--line)"
-      };background:${done ? "rgba(94,234,212,0.08)" : "var(--panel)"}`;
+      tile.style.cssText = `text-align:left;padding:14px;min-height:56px;display:flex;align-items:center;justify-content:space-between;transition:background 0.25s var(--ease-out-quart);background:${
+        done ? "rgba(94,234,212,0.1)" : "var(--panel)"
+      }`;
       tile.innerHTML = `
-        <span style="font-size:0.9rem;font-weight:600;color:${done ? "var(--teal)" : "var(--ink)"}">${habit}</span>
+        <span style="font-size:0.9rem;font-weight:600;transition:color 0.2s;color:${done ? "var(--teal)" : "var(--ink)"}">${habit}</span>
       `;
       tile.addEventListener("click", async () => {
         day.habits[habit] = !day.habits[habit];
-        tile.style.borderColor = day.habits[habit] ? "var(--teal)" : "var(--line)";
-        tile.style.background = day.habits[habit] ? "rgba(94,234,212,0.08)" : "var(--panel)";
-        tile.querySelector("span")!.style.color = day.habits[habit] ? "var(--teal)" : "var(--ink)";
+        const nowDone = day.habits[habit];
+        tile.style.background = nowDone ? "rgba(94,234,212,0.1)" : "var(--panel)";
+        tile.querySelector("span")!.style.color = nowDone ? "var(--teal)" : "var(--ink)";
+        if (nowDone && !prefersReducedMotion()) {
+          tile.classList.remove("tile-pulse");
+          void tile.offsetWidth; // restart animation if replaying
+          tile.classList.add("tile-pulse");
+        }
         await persist(day);
       });
       habitGrid.appendChild(tile);
@@ -204,12 +227,20 @@ export async function mount(container: HTMLElement): Promise<void> {
   energyVal.textContent = `${day.energy} · ${ENERGY_LABELS[day.energy - 1]}`;
   noteEl.value = day.note;
 
+  function settlePop(el: HTMLElement): void {
+    if (prefersReducedMotion()) return;
+    el.classList.remove("number-pop");
+    void el.offsetWidth;
+    el.classList.add("number-pop");
+  }
+
   moodSlider.addEventListener("input", () => {
     const v = Number(moodSlider.value);
     moodVal.textContent = `${v} · ${MOOD_LABELS[v - 1]}`;
   });
   moodSlider.addEventListener("change", async () => {
     day.mood = Number(moodSlider.value);
+    settlePop(moodVal);
     await persist(day);
   });
 
@@ -219,6 +250,7 @@ export async function mount(container: HTMLElement): Promise<void> {
   });
   energySlider.addEventListener("change", async () => {
     day.energy = Number(energySlider.value);
+    settlePop(energyVal);
     await persist(day);
   });
 
