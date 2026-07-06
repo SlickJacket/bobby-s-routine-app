@@ -319,8 +319,6 @@ export async function mount(container: HTMLElement): Promise<void> {
   renderTagChips();
   renderFilterChips();
   renderList();
-
-  ideaInput.focus();
 }
 
 function escapeHtml(s: string): string {

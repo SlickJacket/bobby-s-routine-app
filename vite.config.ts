@@ -19,8 +19,8 @@ export default defineConfig(({ command }) => ({
       },
       includeAssets: ["icons/apple-touch-icon.png"],
       manifest: {
-        name: "Bobby's Life OS Companion",
-        short_name: "Call Sheet",
+        name: "Encore",
+        short_name: "Encore",
         description: "Daily habit log, idea capture, and insights — offline-first.",
         theme_color: "#14151f",
         background_color: "#14151f",

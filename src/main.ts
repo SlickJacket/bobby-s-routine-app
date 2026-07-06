@@ -15,7 +15,7 @@ main.id = "view";
 const nav = document.createElement("nav");
 nav.className = "tabbar";
 nav.innerHTML = `
-  <button data-route="call-sheet">${iconClipboard}<span>Call Sheet</span></button>
+  <button data-route="call-sheet">${iconClipboard}<span>Marquee</span></button>
   <button data-route="ideas">${iconLightbulb}<span>Ideas</span></button>
   <button data-route="insights">${iconBarChart}<span>Insights</span></button>
 `;

@@ -147,11 +147,13 @@ main {
 
 .card {
   background: var(--panel);
-  border: 1px solid transparent;
-  border-image: linear-gradient(180deg, var(--edge-light), var(--line) 55%) 1;
+  border: 1px solid var(--line);
   border-radius: var(--radius);
   padding: 16px;
-  box-shadow: 0 8px 20px -12px rgba(0, 0, 0, 0.5);
+  /* inset highlight (not border-image) so it follows the rounded corners cleanly */
+  box-shadow:
+    inset 0 1px 0 0 var(--edge-light),
+    0 8px 20px -12px rgba(0, 0, 0, 0.5);
 }
 
 /* Marquee bulb row — soft stage-light glow behind it */

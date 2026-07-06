@@ -22,7 +22,7 @@ export async function mount(container: HTMLElement): Promise<void> {
   const root = document.createElement("div");
   root.innerHTML = `
     <div class="topbar">
-      <h1>Call Sheet</h1>
+      <h1>Marquee</h1>
       <button class="icon-btn" id="settings-btn" aria-label="Edit cues">${iconGear}</button>
     </div>
 

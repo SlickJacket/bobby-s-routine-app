@@ -20,7 +20,7 @@ export async function mount(container: HTMLElement): Promise<void> {
     const empty = document.createElement("div");
     empty.className = "card";
     empty.style.marginTop = "16px";
-    empty.innerHTML = `<p class="muted">No days logged yet. Log a day on Call Sheet, then come back here.</p>`;
+    empty.innerHTML = `<p class="muted">No days logged yet. Log a day on Marquee, then come back here.</p>`;
     root.appendChild(empty);
     return;
   }
