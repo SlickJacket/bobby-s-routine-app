@@ -121,7 +121,7 @@ button {
   touch-action: manipulation;
 }
 
-input, textarea {
+input, textarea, select {
   background: var(--panel-2);
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
@@ -492,4 +492,483 @@ input[type="range"]::-moz-range-thumb {
 
 input[type="range"]:active::-webkit-slider-thumb {
   box-shadow: 0 0 0 6px color-mix(in oklch, var(--gold) 30%, transparent), 0 0 16px 2px var(--gold-glow);
+}
+
+/* ================= Green Room ================= */
+
+/* --- Priority --- */
+
+.priority-dot-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* --- List view: sortable table, collapses to stacked cards on phone width --- */
+
+.mobile-sort-select {
+  display: none;
+  margin-bottom: 10px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.idea-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.idea-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.idea-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.idea-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.idea-table tbody tr:hover {
+  background: var(--panel-2);
+}
+
+@media (max-width: 819px) {
+  .mobile-sort-select {
+    display: block;
+  }
+
+  .idea-table thead {
+    display: none;
+  }
+
+  .idea-table, .idea-table tbody, .idea-table tr, .idea-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .idea-table tr {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    padding: 10px 12px;
+    box-shadow: inset 0 1px 0 0 var(--edge-light);
+  }
+
+  .idea-table td {
+    padding: 4px 0;
+    border: none;
+  }
+
+  .idea-table td::before {
+    content: attr(data-label) ": ";
+    color: var(--muted);
+    font-weight: 600;
+  }
+}
+
+/* --- Kanban board --- */
+
+.kanban-board {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+}
+
+.kanban-col {
+  flex: 0 0 82vw;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+}
+
+.kanban-col h3 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+}
+
+.kanban-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 60px;
+  flex: 1;
+  border-radius: var(--radius);
+  transition: background 0.15s ease;
+}
+
+.kanban-cards.drag-over {
+  background: color-mix(in oklch, var(--gold) 10%, transparent);
+}
+
+.kanban-card {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.kanban-card.dragging {
+  opacity: 0.4;
+}
+
+@media (min-width: 820px) {
+  .kanban-board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    overflow-x: visible;
+  }
+
+  .kanban-col {
+    flex: initial;
+    max-width: none;
+  }
+}
+
+/* --- Bottom sheet (stage picker, template picker) --- */
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 80;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 480px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 20px 16px calc(20px + var(--safe-bottom));
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.sheet-option {
+  width: 100%;
+  text-align: left;
+  margin-top: 8px;
+}
+
+.sheet-option.active {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+@media (min-width: 820px) {
+  .sheet-overlay {
+    align-items: center;
+  }
+
+  .sheet {
+    border-radius: var(--radius);
+  }
+}
+
+.template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.template-option {
+  text-align: left;
+}
+
+@media (max-width: 480px) {
+  .template-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Idea detail --- */
+
+.detail-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.detail-meta-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.suggestion-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  border-color: var(--gold);
+}
+
+.pages-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.pages-editor {
+  display: none;
+}
+
+.pages-layout.mobile-editor-open .pages-sidebar {
+  display: none;
+}
+
+.pages-layout.mobile-editor-open .pages-editor {
+  display: block;
+}
+
+@media (min-width: 820px) {
+  .pages-layout {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .pages-sidebar {
+    flex: 0 0 260px;
+  }
+
+  .pages-editor {
+    display: block;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pages-layout.mobile-editor-open .pages-sidebar {
+    display: block;
+  }
+}
+
+.page-row {
+  cursor: pointer;
+  padding: 10px 12px;
+}
+
+.page-row.active {
+  border-color: var(--gold);
+}
+
+.editor-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.page-textarea {
+  width: 100%;
+  min-height: 320px;
+  resize: vertical;
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+
+.page-textarea.mono {
+  font-family: "Courier New", Courier, monospace;
+}
+
+.page-preview {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.page-preview :first-child {
+  margin-top: 0;
+}
+
+.page-preview ul, .page-preview ol {
+  padding-left: 20px;
+}
+
+.page-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 10px 0;
+}
+
+.page-preview th, .page-preview td {
+  border: 1px solid var(--line);
+  padding: 8px;
+  text-align: left;
+}
+
+/* --- Screenplay rendering (live Screenplay pages + imported scripts) --- */
+
+.screenplay {
+  font-family: "Courier New", Courier, monospace;
+  line-height: 1.5;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.sp-scene-heading {
+  font-weight: 700;
+  text-transform: uppercase;
+  margin: 16px 0 4px;
+}
+
+.sp-character {
+  text-align: center;
+  text-transform: uppercase;
+  margin: 12px 0 0;
+}
+
+.sp-parenthetical {
+  text-align: center;
+  font-style: italic;
+  color: var(--muted);
+  margin: 0;
+}
+
+.sp-dialogue {
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+.sp-transition {
+  text-align: right;
+  text-transform: uppercase;
+  margin: 12px 0;
+}
+
+.sp-action {
+  margin: 8px 0;
+}
+
+.sp-blank {
+  height: 8px;
+}
+
+/* --- Beat Board (Save the Cat corkboard) --- */
+
+.beat-board {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.beat-column {
+  flex: 0 0 220px;
+  display: flex;
+  flex-direction: column;
+}
+
+.beat-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.beat-column-header h3 {
+  font-size: 0.95rem;
+}
+
+.beat-column-blurb {
+  font-size: 0.7rem;
+  margin: 4px 0 8px;
+}
+
+.beat-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 40px;
+  flex: 1;
+  border-radius: var(--radius);
+  transition: background 0.15s ease;
+}
+
+.beat-cards.drag-over {
+  background: color-mix(in oklch, var(--gold) 10%, transparent);
+}
+
+.beat-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  box-shadow: inset 0 1px 0 0 var(--edge-light);
+}
+
+.beat-card.dragging {
+  opacity: 0.4;
+}
+
+.beat-card-text {
+  font-size: 0.85rem;
+  cursor: text;
+  white-space: pre-wrap;
+}
+
+.beat-card-input {
+  font-size: 0.85rem;
+  padding: 4px;
+}
+
+.beat-card-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.beat-add-btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
+  color: var(--gold);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+}
+
+/* --- Reference: "filled template" reconstruction block --- */
+
+.reference-filled {
+  margin-top: 14px;
+  padding: 12px;
+  background: var(--panel-2);
+  border-left: 2px solid var(--gold);
+  border-radius: var(--radius-sm);
 }

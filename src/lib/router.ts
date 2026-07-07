@@ -1,6 +1,21 @@
-export type Route = "call-sheet" | "ideas" | "insights" | "settings" | "idea-tags";
+export type Route =
+  | "call-sheet"
+  | "green-room"
+  | "green-room-detail"
+  | "green-room-settings"
+  | "green-room-reference"
+  | "insights"
+  | "settings";
 
-const validRoutes: Route[] = ["call-sheet", "ideas", "insights", "settings", "idea-tags"];
+const validRoutes: Route[] = [
+  "call-sheet",
+  "green-room",
+  "green-room-detail",
+  "green-room-settings",
+  "green-room-reference",
+  "insights",
+  "settings",
+];
 
 function segments(): string[] {
   return window.location.hash.replace(/^#\//, "").split("/");

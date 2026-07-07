@@ -70,10 +70,10 @@ export async function generateSummary(
     lines.push("New ideas logged: 0");
   } else {
     const counts = new Map<string, number>();
-    ideas.forEach((i) => counts.set(i.tag, (counts.get(i.tag) ?? 0) + 1));
+    ideas.forEach((i) => counts.set(i.type, (counts.get(i.type) ?? 0) + 1));
     const breakdown = [...counts.entries()]
       .sort((a, b) => b[1] - a[1])
-      .map(([tag, count]) => `${count} ${tag}`)
+      .map(([type, count]) => `${count} ${type}`)
       .join(", ");
     lines.push(`New ideas logged: ${ideas.length} (${breakdown})`);
   }
